@@ -1,0 +1,90 @@
+import React, { useState, useEffect } from "react";
+import "./style.css";
+
+export default function App() {
+  const [habit, setHabit] = useState("");
+  const [habits, setHabits] = useState([]);
+
+  // Load from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("habits");
+    if (saved) {
+      setHabits(JSON.parse(saved));
+    }
+  }, []);
+
+  // Save to localStorage
+  useEffect(() => {
+    localStorage.setItem("habits", JSON.stringify(habits));
+  }, [habits]);
+
+  function addHabit() {
+    if (!habit.trim()) return;
+    setHabits([
+      ...habits,
+      { name: habit.trim(), status: "not done" }
+    ]);
+    setHabit("");
+  }
+
+  function updateStatus(index, status) {
+    const copy = [...habits];
+    copy[index].status = status;
+    setHabits(copy);
+  }
+
+  function removeHabit(index) {
+    const copy = [...habits];
+    copy.splice(index, 1);
+    setHabits(copy);
+  }
+
+  return (
+    <div className="app">
+      <h1>Habit Tracker</h1>
+
+      <input
+        placeholder="Enter habit name"
+        value={habit}
+        onChange={(e) => setHabit(e.target.value)}
+      />
+
+      <button onClick={addHabit} disabled={!habit.trim()}>
+        Add Habit
+      </button>
+
+      <ul>
+        {habits.map((h, index) => (
+          <li
+            key={index}
+            className={h.status === "done" ? "done" : "not-done"}
+          >
+            <div className="card-inner">
+              <div className="card-front">
+                {h.name}
+              </div>
+
+              <div className="card-back">
+                {h.status === "done" ? "✔ Done" : "✖ Not Done"}
+              </div>
+            </div>
+
+            <div className="actions">
+              <button onClick={() => updateStatus(index, "done")}>
+                Done
+              </button>
+
+              <button onClick={() => updateStatus(index, "not done")}>
+                Not Done
+              </button>
+
+              <button onClick={() => removeHabit(index)}>
+                Remove
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
